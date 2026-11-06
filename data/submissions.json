@@ -1,0 +1,149 @@
+[
+  {
+    "id": "lead_1793975250188_marcus",
+    "createdAt": "2026-11-06T14:26:50.845Z",
+    "updatedAt": "2026-11-06T14:27:30.194Z",
+    "stage": "appointment_booked",
+    "firstName": "Marcus",
+    "lastName": "Vance",
+    "email": "marcus.vance@example.com",
+    "phone": "(555) 888-9999",
+    "smsConsent": true,
+    "iraAmount": "500k_1m",
+    "focusAreas": [
+      "investments",
+      "tax",
+      "retirement"
+    ],
+    "hasHadAdvisor": "yes",
+    "concerns": [
+      "wrong_mix",
+      "tax_drag"
+    ],
+    "household": [
+      "Partner",
+      "Dependents"
+    ],
+    "householdIncome": "From300kTo500k",
+    "bookingDate": "Monday, November 9th",
+    "bookingTime": "3:45pm",
+    "bookingTimestamp": 1794278399000,
+    "pdfUrl": "/submissions/RangeRange_Booked_Marcus_1793975250188.pdf"
+  },
+  {
+    "id": "lead_1793971890906_drake",
+    "createdAt": "2026-11-06T13:31:30.797Z",
+    "updatedAt": "2026-11-06T13:31:30.906Z",
+    "stage": "appointment_booked",
+    "firstName": "Drake",
+    "lastName": "Hampton",
+    "email": "drakehampton205@gmail.com",
+    "phone": "(555) 555-5555",
+    "smsConsent": true,
+    "iraAmount": "500k_1m",
+    "focusAreas": [
+      "investments",
+      "tax"
+    ],
+    "hasHadAdvisor": "yes",
+    "concerns": [
+      "wrong_mix"
+    ],
+    "household": [
+      "Partner",
+      "Dependents"
+    ],
+    "householdIncome": "From250kTo500k",
+    "bookingDate": "Friday, November 6th",
+    "bookingTime": "2:30pm",
+    "bookingTimestamp": 1794019199000,
+    "pdfUrl": "/submissions/RangeRange_Booked_Drake_1793971890906.pdf"
+  },
+  {
+    "id": "lead_1793970960109_phil",
+    "createdAt": "2026-11-06T13:16:00.109Z",
+    "updatedAt": "2026-11-06T13:16:00.109Z",
+    "stage": "eligibility_passed",
+    "firstName": "Phil",
+    "lastName": "Harrison",
+    "email": "phil.harrison@investmail.com",
+    "phone": "",
+    "smsConsent": false,
+    "iraAmount": "over_1m",
+    "focusAreas": [
+      "investments",
+      "retirement",
+      "estate"
+    ],
+    "hasHadAdvisor": "no",
+    "concerns": [
+      "high_fees",
+      "scattered_accounts"
+    ],
+    "household": [
+      "Partner"
+    ],
+    "householdIncome": "Over1m",
+    "bookingDate": "",
+    "bookingTime": "",
+    "pdfUrl": "/submissions/RangeRange_phil_1793970960109.pdf"
+  },
+  {
+    "id": "lead_1793969000000_sophia",
+    "createdAt": "2026-11-06T12:45:00.000Z",
+    "updatedAt": "2026-11-06T12:58:00.000Z",
+    "stage": "appointment_booked",
+    "firstName": "Sophia",
+    "lastName": "Chen",
+    "email": "sophia.chen@techventures.io",
+    "phone": "(415) 892-1200",
+    "smsConsent": true,
+    "iraAmount": "over_1m",
+    "focusAreas": [
+      "investments",
+      "taxes",
+      "estate"
+    ],
+    "hasHadAdvisor": "yes",
+    "concerns": [
+      "tax_drag",
+      "family_protection"
+    ],
+    "household": [
+      "Partner",
+      "Dependents"
+    ],
+    "householdIncome": "Over1m",
+    "bookingDate": "Tuesday, November 10th",
+    "bookingTime": "4:15pm",
+    "bookingTimestamp": 1794364799000,
+    "pdfUrl": "/submissions/RangeRange_Booked_Drake_1793971890906.pdf"
+  },
+  {
+    "id": "lead_1793968000000_emily",
+    "createdAt": "2026-11-06T11:20:00.000Z",
+    "updatedAt": "2026-11-06T11:20:00.000Z",
+    "stage": "eligibility_passed",
+    "firstName": "Emily",
+    "lastName": "Rodriguez",
+    "email": "emily.rodriguez@biomedcorp.org",
+    "phone": "",
+    "smsConsent": false,
+    "iraAmount": "250k_500k",
+    "focusAreas": [
+      "retirement",
+      "investments"
+    ],
+    "hasHadAdvisor": "no",
+    "concerns": [
+      "wrong_mix"
+    ],
+    "household": [
+      "Dependents"
+    ],
+    "householdIncome": "From200kTo300k",
+    "bookingDate": "",
+    "bookingTime": "",
+    "pdfUrl": "/submissions/RangeRange_Eligible_Drake_1793971890797.pdf"
+  }
+]
