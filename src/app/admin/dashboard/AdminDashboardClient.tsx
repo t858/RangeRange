@@ -368,15 +368,16 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
 
             <button
               onClick={async () => {
-                const sampleName = ['David', 'Olivia', 'Ethan', 'Chloe', 'Lucas'][Math.floor(Math.random() * 5)];
-                const sampleLast = ['Bennett', 'Hayes', 'Cooper', 'Reynolds', 'Sinclair'][Math.floor(Math.random() * 5)];
+                const sampleName = ['David', 'Olivia', 'Ethan', 'Chloe', 'Lucas', 'Julian', 'Maya', 'Nolan', 'Zoe', 'Caleb'][Math.floor(Math.random() * 10)];
+                const sampleLast = ['Bennett', 'Hayes', 'Cooper', 'Reynolds', 'Sinclair', 'Morrison', 'Keller', 'Patel', 'Lawson', 'Vaughn'][Math.floor(Math.random() * 10)];
+                const randomSalt = Math.floor(1000 + Math.random() * 9000);
                 await fetch('/api/submit', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     firstName: sampleName,
                     lastName: sampleLast,
-                    email: `${sampleName.toLowerCase()}.${sampleLast.toLowerCase()}@example.com`,
+                    email: `${sampleName.toLowerCase()}.${sampleLast.toLowerCase()}.${randomSalt}@example.com`,
                     phone: `(555) ${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`,
                     iraAmount: '500k_1m',
                     focusAreas: ['investments', 'taxes'],

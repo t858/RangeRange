@@ -1,5 +1,116 @@
 [
   {
+    "id": "lead_1793988192936_9i0xy",
+    "createdAt": "2026-11-06T18:03:12.936Z",
+    "updatedAt": "2026-11-06T18:03:12.936Z",
+    "stage": "appointment_booked",
+    "iraAmount": "500k_1m",
+    "focusAreas": [
+      "investments",
+      "taxes"
+    ],
+    "firstName": "Nolan",
+    "lastName": "Patel",
+    "hasHadAdvisor": "yes",
+    "concerns": [
+      "wrong_mix"
+    ],
+    "household": [
+      "Partner",
+      "Dependents"
+    ],
+    "householdIncome": "From300kTo500k",
+    "email": "nolan.patel.7389@example.com",
+    "bookingDate": "Wednesday, November 11th",
+    "bookingTime": "3:00pm",
+    "phone": "(555) 690-8794",
+    "pdfUrl": "/submissions/RangeRange_Booked_Nolan_1793988192924.pdf"
+  },
+  {
+    "id": "lead_1793988189132_x9w0f",
+    "createdAt": "2026-11-06T18:03:09.132Z",
+    "updatedAt": "2026-11-06T18:03:09.132Z",
+    "stage": "appointment_booked",
+    "iraAmount": "500k_1m",
+    "focusAreas": [
+      "investments",
+      "taxes"
+    ],
+    "firstName": "Nolan",
+    "lastName": "Bennett",
+    "hasHadAdvisor": "yes",
+    "concerns": [
+      "wrong_mix"
+    ],
+    "household": [
+      "Partner",
+      "Dependents"
+    ],
+    "householdIncome": "From300kTo500k",
+    "email": "nolan.bennett.9601@example.com",
+    "bookingDate": "Wednesday, November 11th",
+    "bookingTime": "3:00pm",
+    "phone": "(555) 204-9195",
+    "pdfUrl": "/submissions/RangeRange_Booked_Nolan_1793988189125.pdf"
+  },
+  {
+    "id": "lead_1793988128987_uaw07",
+    "createdAt": "2026-11-06T18:02:08.987Z",
+    "updatedAt": "2026-11-06T18:02:08.987Z",
+    "stage": "eligibility_passed",
+    "iraAmount": "250k_500k",
+    "firstName": "Lead10",
+    "lastName": "Test",
+    "email": "testlead10@example.com",
+    "pdfUrl": "/submissions/RangeRange_Eligible_Lead10_1793988128981.pdf"
+  },
+  {
+    "id": "lead_1793988128930_kuf06",
+    "createdAt": "2026-11-06T18:02:08.930Z",
+    "updatedAt": "2026-11-06T18:02:08.930Z",
+    "stage": "eligibility_passed",
+    "iraAmount": "250k_500k",
+    "firstName": "Lead9",
+    "lastName": "Test",
+    "email": "testlead9@example.com",
+    "pdfUrl": "/submissions/RangeRange_Eligible_Lead9_1793988128924.pdf"
+  },
+  {
+    "id": "lead_1793988128917_f744v",
+    "createdAt": "2026-11-06T18:02:08.917Z",
+    "updatedAt": "2026-11-06T18:02:08.917Z",
+    "stage": "eligibility_passed",
+    "iraAmount": "250k_500k",
+    "firstName": "Lead8",
+    "lastName": "Test",
+    "email": "testlead8@example.com",
+    "pdfUrl": "/submissions/RangeRange_Eligible_Lead8_1793988128911.pdf"
+  },
+  {
+    "id": "lead_1793988128782_nmoyt",
+    "createdAt": "2026-11-06T18:02:08.782Z",
+    "updatedAt": "2026-11-06T18:02:08.782Z",
+    "stage": "eligibility_passed",
+    "iraAmount": "250k_500k",
+    "firstName": "Lead7",
+    "lastName": "Test",
+    "email": "testlead7@example.com",
+    "pdfUrl": "/submissions/RangeRange_Eligible_Lead7_1793988128772.pdf"
+  },
+  {
+    "id": "lead_1793988055505_etemp",
+    "createdAt": "2026-11-06T18:00:55.504Z",
+    "updatedAt": "2026-11-06T18:00:55.504Z",
+    "stage": "appointment_booked",
+    "iraAmount": "over_1m",
+    "firstName": "Alexander",
+    "lastName": "Pierce",
+    "email": "alex.pierce@domain.com",
+    "bookingDate": "Thursday, Nov 12th",
+    "bookingTime": "10:00am",
+    "pdfUrl": "/submissions/RangeRange_Booked_Alexander_1793988055498.pdf"
+  },
+  {
     "id": "lead_1793975250188_marcus",
     "createdAt": "2026-11-06T14:26:50.845Z",
     "updatedAt": "2026-11-06T14:27:30.194Z",
