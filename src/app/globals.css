@@ -22,4 +22,92 @@ body {
   animation: cursorBlink 0.75s infinite;
 }
 
+/* ==========================================================================
+   Admin Dashboard Custom CSS (Light theme, crystal clear contrast)
+   ========================================================================== */
+.admin-theme {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  min-height: 100vh;
+}
 
+.admin-theme * {
+  box-sizing: border-box;
+}
+
+.admin-header-bar {
+  background-color: #ffffff !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+.admin-surface-card {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.admin-table-container {
+  background-color: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06) !important;
+  overflow: hidden;
+}
+
+.admin-table-root {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.admin-table-root th {
+  background-color: #f1f5f9 !important;
+  color: #475569 !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.06em !important;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid #cbd5e1 !important;
+}
+
+.admin-table-root td {
+  padding: 16px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: #1e293b !important;
+  font-size: 13px !important;
+  vertical-align: middle;
+}
+
+.admin-table-row:hover td {
+  background-color: #f8fafc !important;
+}
+
+.admin-badge-booked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #065f46 !important;
+  font-weight: 700 !important;
+  padding: 4px 10px !important;
+  border-radius: 9999px !important;
+  font-size: 11px !important;
+}
+
+.admin-badge-eligible {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #fffbeb !important;
+  border: 1px solid #fde68a !important;
+  color: #92400e !important;
+  font-weight: 700 !important;
+  padding: 4px 10px !important;
+  border-radius: 9999px !important;
+  font-size: 11px !important;
+}
