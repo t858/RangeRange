@@ -54,7 +54,7 @@ function escapePdf(text: string): string {
     .replace(/\)/g, '\\)');
 }
 
-export function generatePdfBuffer(data: ClientSubmissionData): Buffer {
+export function generatePdfBuffer(data: Partial<ClientSubmissionData>): Buffer {
   const contentLines: string[] = [];
 
   // Top decorative brand header banner
