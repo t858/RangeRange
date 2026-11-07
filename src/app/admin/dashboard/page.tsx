@@ -1,12 +1,12 @@
 import React from 'react';
-import { getAllSubmissions } from '@/lib/submissionsStore';
+import { getAllSubmissionsAsync } from '@/lib/submissionsStore';
 import AdminDashboardClient from './AdminDashboardClient';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default function AdminDashboardPage() {
-  const initialSubmissions = getAllSubmissions();
+export default async function AdminDashboardPage() {
+  const initialSubmissions = await getAllSubmissionsAsync();
 
   return <AdminDashboardClient initialSubmissions={initialSubmissions} />;
 }

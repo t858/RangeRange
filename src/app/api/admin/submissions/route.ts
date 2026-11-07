@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllSubmissions, clearAllSubmissions } from '@/lib/submissionsStore';
+import { getAllSubmissionsAsync, clearAllSubmissionsAsync } from '@/lib/submissionsStore';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(req: NextRequest) {
   try {
-    const list = getAllSubmissions();
+    const list = await getAllSubmissionsAsync();
     return NextResponse.json(
       {
         success: true,
@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    clearAllSubmissions();
+    await clearAllSubmissionsAsync();
     return NextResponse.json({
       success: true,
       message: 'All submissions cleared successfully',

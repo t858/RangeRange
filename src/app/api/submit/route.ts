@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { generatePdfBuffer, ClientSubmissionData } from '@/lib/generatePdf';
-import { saveOrUpdateSubmission } from '@/lib/submissionsStore';
+import { saveOrUpdateSubmissionAsync } from '@/lib/submissionsStore';
 
 interface SubmissionPayload extends Partial<ClientSubmissionData> {
   id?: string;
@@ -17,24 +17,27 @@ export async function POST(req: NextRequest) {
     // 1. Generate the PDF
     const pdfBuffer = generatePdfBuffer(data);
 
-    // 2. Ensure public/submissions folder exists
-    const submissionsDir = path.join(process.cwd(), 'public', 'submissions');
-    if (!fs.existsSync(submissionsDir)) {
-      fs.mkdirSync(submissionsDir, { recursive: true });
-    }
-
+    // 2. Try saving PDF to public/submissions folder (works locally, gracefully skips if read-only filesystem)
     const timestamp = Date.now();
     const safeName = (data.firstName || 'Client').replace(/[^a-zA-Z0-9]/g, '');
     const stagePrefix = stage === 'appointment_booked' ? 'Booked' : 'Eligible';
     const fileName = `RangeRange_${stagePrefix}_${safeName}_${timestamp}.pdf`;
-    const filePath = path.join(submissionsDir, fileName);
 
-    fs.writeFileSync(filePath, pdfBuffer);
+    try {
+      const submissionsDir = path.join(process.cwd(), 'public', 'submissions');
+      if (!fs.existsSync(submissionsDir)) {
+        fs.mkdirSync(submissionsDir, { recursive: true });
+      }
+      const filePath = path.join(submissionsDir, fileName);
+      fs.writeFileSync(filePath, pdfBuffer);
+    } catch (fsErr) {
+      // Vercel serverless read-only filesystem; continue without crashing
+    }
 
     const pdfUrl = `/submissions/${fileName}`;
 
-    // 3. Save / Update structured record in data/submissions.json (Admin Dashboard data store)
-    const savedRecord = saveOrUpdateSubmission({
+    // 3. Save / Update structured record in Cloud JSONBin + local fallback
+    const savedRecord = await saveOrUpdateSubmissionAsync({
       id: data.id,
       stage,
       iraAmount: data.iraAmount,
