@@ -4,7 +4,8 @@ import path from 'path';
 import { generatePdfBuffer, ClientSubmissionData } from '@/lib/generatePdf';
 import { saveOrUpdateSubmission } from '@/lib/submissionsStore';
 
-interface SubmissionPayload extends ClientSubmissionData {
+interface SubmissionPayload extends Partial<ClientSubmissionData> {
+  id?: string;
   stage?: 'eligibility_passed' | 'appointment_booked';
 }
 
@@ -33,7 +34,8 @@ export async function POST(req: NextRequest) {
     const pdfUrl = `/submissions/${fileName}`;
 
     // 3. Save / Update structured record in data/submissions.json (Admin Dashboard data store)
-    saveOrUpdateSubmission({
+    const savedRecord = saveOrUpdateSubmission({
+      id: data.id,
       stage,
       iraAmount: data.iraAmount,
       focusAreas: data.focusAreas,
@@ -55,10 +57,11 @@ export async function POST(req: NextRequest) {
     const origin = req.nextUrl.origin || 'http://localhost:3000';
     const absolutePdfUrl = `${origin}${pdfUrl}`;
 
-    console.log(`[Admin Record Saved] Stage: ${stage} | PDF: ${fileName} | URL: ${absolutePdfUrl}`);
+    console.log(`[Admin Record Saved] Stage: ${stage} | ID: ${savedRecord.id} | PDF: ${fileName}`);
 
     return NextResponse.json({
       success: true,
+      id: savedRecord.id,
       stage,
       fileName,
       pdfUrl,

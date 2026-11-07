@@ -39,7 +39,7 @@ export default function StepClient({ stepId }: StepClientProps) {
         };
         updateState({ passedEligibility: true });
 
-        // Automatically dispatch all inputted information and generated PDF to admin WhatsApp in the background
+        // Automatically dispatch all inputted information and generated PDF to the database & admin dashboard
         fetch('/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -47,9 +47,16 @@ export default function StepClient({ stepId }: StepClientProps) {
             ...fullProfile,
             stage: 'eligibility_passed',
           }),
-        }).catch((err) => {
-          console.error('Silent admin submission failed:', err);
-        });
+        })
+          .then((r) => r.json())
+          .then((res) => {
+            if (res && res.id) {
+              updateState({ leadId: res.id });
+            }
+          })
+          .catch((err) => {
+            console.error('Silent admin submission failed:', err);
+          });
 
         router.replace('/step/10');
       }, 3600);
@@ -854,6 +861,7 @@ export default function StepClient({ stepId }: StepClientProps) {
             onConfirm={async (details) => {
               const fullSubmission = {
                 ...state,
+                id: state.leadId,
                 firstName: details.firstName,
                 lastName: details.lastName,
                 email: details.email,

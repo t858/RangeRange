@@ -54,22 +54,16 @@ export function saveOrUpdateSubmission(data: Partial<LeadSubmission>): LeadSubmi
   const list = getAllSubmissions();
   const now = new Date().toISOString();
 
-  // Match existing record by email or name if updating appointment
+  // If a specific record ID is provided (e.g. updating the same session from Step 9 to Step 10 booking)
   let existingIndex = -1;
-  if (data.email) {
-    existingIndex = list.findIndex(item => item.email && item.email.toLowerCase() === data.email?.toLowerCase());
-  }
-  if (existingIndex === -1 && data.firstName && data.lastName) {
-    existingIndex = list.findIndex(item =>
-      item.firstName?.toLowerCase() === data.firstName?.toLowerCase() &&
-      item.lastName?.toLowerCase() === data.lastName?.toLowerCase()
-    );
+  if (data.id) {
+    existingIndex = list.findIndex(item => item.id === data.id);
   }
 
   let record: LeadSubmission;
 
   if (existingIndex >= 0) {
-    // Strip undefined keys from incoming data so we don't overwrite existing pre-eligibility fields
+    // Updating the current session's appointment info on Step 10
     const cleanedUpdates = Object.fromEntries(
       Object.entries(data).filter(([_, v]) => v !== undefined)
     );
@@ -82,13 +76,15 @@ export function saveOrUpdateSubmission(data: Partial<LeadSubmission>): LeadSubmi
     };
     list[existingIndex] = record;
   } else {
-    // Create new record
+    // ALWAYS create a brand new distinct submission entry on the dashboard
+    // Every time anyone passes eligibility (even if using the same email or name as an existing user)
+    const newId = data.id || `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
     record = {
-      id: `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      ...data,
+      id: newId,
       createdAt: now,
       updatedAt: now,
       stage: data.stage || (data.bookingTime ? 'appointment_booked' : 'eligibility_passed'),
-      ...data,
     };
     list.unshift(record);
   }

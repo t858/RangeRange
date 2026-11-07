@@ -19,6 +19,7 @@ export interface FunnelState {
   otherConcern: string;
   passedEligibility: boolean;
   isBooked: boolean;
+  leadId?: string;
 }
 
 export const DEFAULT_FUNNEL_STATE: FunnelState = {
@@ -38,6 +39,7 @@ export const DEFAULT_FUNNEL_STATE: FunnelState = {
   otherConcern: '',
   passedEligibility: false,
   isBooked: false,
+  leadId: undefined,
 };
 
 interface FunnelContextType {
