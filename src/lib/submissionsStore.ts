@@ -94,7 +94,12 @@ export async function getAllSubmissionsAsync(): Promise<LeadSubmission[]> {
       });
       if (res.ok) {
         const data = await res.json();
-        const list = Array.isArray(data.record) ? data.record : [];
+        let list: LeadSubmission[] = [];
+        if (Array.isArray(data.record)) {
+          list = data.record;
+        } else if (data.record && Array.isArray(data.record.submissions)) {
+          list = data.record.submissions;
+        }
         inMemoryCache = list;
         return list;
       }
