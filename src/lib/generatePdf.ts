@@ -175,34 +175,43 @@ export function generatePdfBuffer(data: Partial<ClientSubmissionData>): Buffer {
   contentLines.push('ET');
 
   const streamContent = contentLines.join('\n');
-  const streamLength = Buffer.byteLength(streamContent);
+  const streamLength = Buffer.byteLength(streamContent, 'utf8');
+
+  // Binary comment for Apple Quartz / iOS CoreGraphics & Android compatibility
+  const binaryComment = Buffer.from([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a]); // %âãÏÓ\n
+  const header = Buffer.concat([Buffer.from('%PDF-1.4\n', 'utf8'), binaryComment]);
 
   const objects = [
-    `1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj`,
-    `2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj`,
-    `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj`,
-    `4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj`,
-    `5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj`,
-    `6 0 obj\n<< /Length ${streamLength} >>\nstream\n${streamContent}\nendstream\nendobj`,
+    `1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n`,
+    `2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n`,
+    `3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> /ProcSet [/PDF /Text] >> /Contents 6 0 R >>\nendobj\n`,
+    `4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>\nendobj\n`,
+    `5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>\nendobj\n`,
+    `6 0 obj\n<< /Length ${streamLength} >>\nstream\n${streamContent}\nendstream\nendobj\n`,
   ];
 
-  let offset = 0;
+  const objBuffers = objects.map(o => Buffer.from(o, 'utf8'));
+
   const offsets: number[] = [];
-  let pdf = `%PDF-1.4\n`;
-  offset = Buffer.byteLength(pdf);
+  let currentOffset = header.length;
 
-  objects.forEach(obj => {
-    offsets.push(offset);
-    pdf += obj + '\n';
-    offset = Buffer.byteLength(pdf);
-  });
+  for (const objBuf of objBuffers) {
+    offsets.push(currentOffset);
+    currentOffset += objBuf.length;
+  }
 
-  const xrefOffset = offset;
-  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
-  offsets.forEach(off => {
-    pdf += String(off).padStart(10, '0') + ` 00000 n \n`;
-  });
+  const xrefOffset = currentOffset;
+  let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (const off of offsets) {
+    xref += String(off).padStart(10, '0') + ` 00000 n \n`;
+  }
 
-  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
-  return Buffer.from(pdf);
+  const trailer = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefOffset}\n%%EOF\n`;
+
+  return Buffer.concat([
+    header,
+    ...objBuffers,
+    Buffer.from(xref, 'utf8'),
+    Buffer.from(trailer, 'utf8')
+  ]);
 }

@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       // Vercel serverless read-only filesystem; continue without crashing
     }
 
-    const pdfUrl = `/submissions/${fileName}`;
+    const pdfUrl = `/api/pdf?file=${fileName}`;
 
     // 3. Save / Update structured record in Cloud JSONBin + local fallback
     const savedRecord = await saveOrUpdateSubmissionAsync({

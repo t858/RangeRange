@@ -57,6 +57,26 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
   const [filter, setFilter] = useState<'all' | 'booked' | 'eligible'>('all');
   const [search, setSearch] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState<LeadSubmission | null>(null);
+  const [previewPdf, setPreviewPdf] = useState<{
+    viewUrl: string;
+    downloadUrl: string;
+    fileName: string;
+    title: string;
+  } | null>(null);
+
+  const getPdfUrls = (sub: LeadSubmission) => {
+    let fileName = '';
+    if (sub.pdfUrl) {
+      if (sub.pdfUrl.includes('file=')) {
+        fileName = new URLSearchParams(sub.pdfUrl.split('?')[1] || '').get('file') || '';
+      } else {
+        fileName = sub.pdfUrl.split('/').pop() || '';
+      }
+    }
+    const viewUrl = `/api/pdf?file=${encodeURIComponent(fileName)}&id=${encodeURIComponent(sub.id)}`;
+    const downloadUrl = `/api/pdf?file=${encodeURIComponent(fileName)}&id=${encodeURIComponent(sub.id)}&download=1`;
+    return { fileName: fileName || 'RangeRange_Document.pdf', viewUrl, downloadUrl };
+  };
 
   const fetchData = async () => {
     try {
@@ -788,28 +808,63 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
                         })}
                       </td>
 
-                      {/* PDF File */}
+                      {/* PDF File Actions (Mobile & Desktop Compatible) */}
                       <td style={{ padding: '16px', textAlign: 'right', whiteSpace: 'nowrap' }} onClick={(e) => e.stopPropagation()}>
                         {sub.pdfUrl ? (
-                          <a
-                            href={sub.pdfUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              borderRadius: '8px',
-                              backgroundColor: '#000000',
-                              color: '#ffffff',
-                              padding: '7px 14px',
-                              fontSize: '11px',
-                              fontWeight: 800,
-                              textDecoration: 'none',
-                            }}
-                          >
-                            View PDF
-                          </a>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const urls = getPdfUrls(sub);
+                                setPreviewPdf({
+                                  ...urls,
+                                  title: `${sub.firstName || 'Client'} ${sub.lastName || ''} - Consultation Record`,
+                                });
+                              }}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                borderRadius: '8px',
+                                backgroundColor: '#000000',
+                                color: '#ffffff',
+                                padding: '7px 12px',
+                                fontSize: '11px',
+                                fontWeight: 800,
+                                border: 'none',
+                                cursor: 'pointer',
+                              }}
+                              title="Preview PDF"
+                            >
+                              View PDF
+                            </button>
+                            <a
+                              href={getPdfUrls(sub).downloadUrl}
+                              download={getPdfUrls(sub).fileName}
+                              style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                borderRadius: '8px',
+                                backgroundColor: '#f1f5f9',
+                                color: '#0f172a',
+                                border: '1px solid #cbd5e1',
+                                padding: '6px 10px',
+                                fontSize: '11px',
+                                fontWeight: 800,
+                                textDecoration: 'none',
+                                cursor: 'pointer',
+                              }}
+                              title="Download PDF to device"
+                            >
+                              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                                <polyline points="7 10 12 15 17 10" />
+                                <line x1="12" y1="15" x2="12" y2="3" />
+                              </svg>
+                              Download
+                            </a>
+                          </div>
                         ) : (
                           <span style={{ color: '#94a3b8' }}>—</span>
                         )}
@@ -1027,7 +1082,7 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
               </div>
             </div>
 
-            {/* PDF CTA */}
+            {/* PDF CTA (Mobile & Desktop Compatible) */}
             {selectedSubmission.pdfUrl && (
               <div
                 style={{
@@ -1037,27 +1092,201 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
+                  gap: '10px',
+                  flexWrap: 'wrap',
                 }}
               >
-                <span style={{ fontSize: '12px', color: '#000000', fontWeight: 700 }}>Generated submission PDF document</span>
+                <span style={{ fontSize: '12px', color: '#000000', fontWeight: 700 }}>
+                  Submission PDF document
+                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const urls = getPdfUrls(selectedSubmission);
+                      setPreviewPdf({
+                        ...urls,
+                        title: `${selectedSubmission.firstName || 'Client'} ${selectedSubmission.lastName || ''} - Official Record`,
+                      });
+                    }}
+                    style={{
+                      backgroundColor: '#000000',
+                      color: '#ffffff',
+                      padding: '9px 16px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Preview PDF
+                  </button>
+                  <a
+                    href={getPdfUrls(selectedSubmission).downloadUrl}
+                    download={getPdfUrls(selectedSubmission).fileName}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      backgroundColor: '#15803d',
+                      color: '#ffffff',
+                      padding: '9px 16px',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      fontWeight: 800,
+                      textDecoration: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                    Download PDF
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Mobile-Friendly Fullscreen/Responsive PDF Viewer Modal */}
+      {previewPdf && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 100,
+            backgroundColor: 'rgba(0,0,0,0.75)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '12px',
+          }}
+          onClick={() => setPreviewPdf(null)}
+        >
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '920px',
+              height: '92vh',
+              backgroundColor: '#ffffff',
+              borderRadius: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+              boxShadow: '0 25px 50px rgba(0,0,0,0.5)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header Bar */}
+            <div
+              style={{
+                padding: '12px 16px',
+                borderBottom: '2px solid #e2e8f0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: '#f8fafc',
+                gap: '10px',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ minWidth: 0, flex: 1 }}>
+                <h3 style={{ margin: 0, fontSize: '14px', fontWeight: 900, color: '#000000', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {previewPdf.title}
+                </h3>
+                <p style={{ margin: '2px 0 0 0', fontSize: '11px', color: '#64748b' }}>
+                  Mobile &amp; Tablet Optimized Viewer
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <a
-                  href={selectedSubmission.pdfUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={previewPdf.downloadUrl}
+                  download={previewPdf.fileName}
                   style={{
-                    backgroundColor: '#000000',
-                    color: '#ffffff',
-                    padding: '9px 18px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
                     borderRadius: '8px',
+                    backgroundColor: '#15803d',
+                    color: '#ffffff',
+                    padding: '8px 14px',
                     fontSize: '12px',
                     fontWeight: 800,
                     textDecoration: 'none',
+                    cursor: 'pointer',
                   }}
                 >
-                  Open Official PDF
+                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                  Download PDF
                 </a>
+
+                <a
+                  href={previewPdf.viewUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    borderRadius: '8px',
+                    backgroundColor: '#000000',
+                    color: '#ffffff',
+                    padding: '8px 12px',
+                    fontSize: '12px',
+                    fontWeight: 800,
+                    textDecoration: 'none',
+                    cursor: 'pointer',
+                  }}
+                >
+                  New Tab ↗
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setPreviewPdf(null)}
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    border: '1px solid #cbd5e1',
+                    backgroundColor: '#ffffff',
+                    color: '#000000',
+                    fontSize: '15px',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  aria-label="Close"
+                >
+                  ✕
+                </button>
               </div>
-            )}
+            </div>
+
+            {/* Embedded Responsive PDF Viewer */}
+            <div style={{ flex: 1, backgroundColor: '#525659', position: 'relative' }}>
+              <iframe
+                src={`${previewPdf.viewUrl}#view=FitH`}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                }}
+                title={previewPdf.title}
+              />
+            </div>
           </div>
         </div>
       )}
