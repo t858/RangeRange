@@ -1,5 +1,74 @@
 [
   {
+    "id": "lead_1794959626487_boy7d",
+    "stage": "appointment_booked",
+    "iraAmount": "100k_250k",
+    "focusAreas": [
+      "investments",
+      "retirement"
+    ],
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "hasHadAdvisor": "yes",
+    "concerns": [
+      "wrong_mix"
+    ],
+    "otherConcern": "",
+    "household": [
+      "Partner"
+    ],
+    "householdIncome": "From500kTo1m",
+    "email": "janedoe@example.com",
+    "bookingDate": "Thursday, November 19",
+    "bookingTime": "2:30pm",
+    "phone": "(555) 123-4567",
+    "pdfUrl": "/submissions/RangeRange_Booked_Jane_1794959665493.pdf",
+    "createdAt": "2026-11-17T23:53:46.487Z",
+    "updatedAt": "2026-11-17T23:54:26.326Z"
+  },
+  {
+    "id": "lead_1794959117830_sgkzx",
+    "stage": "eligibility_passed",
+    "iraAmount": "500k_1m",
+    "firstName": "TestUser",
+    "lastName": "LiveCheck",
+    "email": "testuser@example.com",
+    "pdfUrl": "/submissions/RangeRange_Eligible_TestUser_1794959116889.pdf",
+    "createdAt": "2026-11-17T23:45:17.830Z",
+    "updatedAt": "2026-11-17T23:45:17.830Z"
+  },
+  {
+    "id": "lead_1794949489447_hcpo0",
+    "stage": "appointment_booked",
+    "iraAmount": "500k_1m",
+    "focusAreas": [
+      "investments",
+      "taxes",
+      "estate"
+    ],
+    "firstName": "Alex",
+    "lastName": "Morgan",
+    "hasHadAdvisor": "yes",
+    "concerns": [
+      "wrong_mix",
+      "tax_drag"
+    ],
+    "otherConcern": "",
+    "household": [
+      "Partner",
+      "Dependents"
+    ],
+    "householdIncome": "From300kTo500k",
+    "email": "alex.morgan.test@example.com",
+    "pdfUrl": "/submissions/RangeRange_Booked_Alex_1794949491174.pdf",
+    "createdAt": "2026-11-17T21:04:49.447Z",
+    "updatedAt": "2026-11-17T21:04:51.572Z",
+    "bookingDate": "Thursday, Nov 19th",
+    "bookingTime": "2:30 PM",
+    "phone": "(555) 234-5678",
+    "smsConsent": true
+  },
+  {
     "id": "lead_1794055990090_1dyr4",
     "stage": "eligibility_passed",
     "iraAmount": "500k_1m",

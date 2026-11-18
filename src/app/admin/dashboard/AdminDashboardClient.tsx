@@ -47,6 +47,13 @@ interface Props {
 export default function AdminDashboardClient({ initialSubmissions }: Props) {
   const [submissions, setSubmissions] = useState<LeadSubmission[]>(initialSubmissions || []);
   const [loading, setLoading] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [storageInfo, setStorageInfo] = useState<{ isConfigured: boolean; binId: string; source: string }>({
+    isConfigured: true,
+    binId: '6aef44deffd5d16053af4a8d',
+    source: 'JSONBin.io',
+  });
   const [filter, setFilter] = useState<'all' | 'booked' | 'eligible'>('all');
   const [search, setSearch] = useState('');
   const [selectedSubmission, setSelectedSubmission] = useState<LeadSubmission | null>(null);
@@ -65,6 +72,10 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
       if (data.success && Array.isArray(data.submissions)) {
         setSubmissions(data.submissions);
       }
+      if (data.storage) {
+        setStorageInfo(data.storage);
+      }
+      setLastRefreshed(new Date());
     } catch (err) {
       console.error('Failed to load submissions:', err);
     } finally {
@@ -75,6 +86,29 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!autoRefresh) return;
+    const interval = setInterval(() => {
+      fetchData();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [autoRefresh]);
+
+  const handleClearAll = async () => {
+    if (!window.confirm('Are you sure you want to clear all submissions from JSONBin and the database? This cannot be undone.')) {
+      return;
+    }
+    try {
+      setLoading(true);
+      await fetch('/api/admin/submissions', { method: 'DELETE' });
+      await fetchData();
+    } catch (err) {
+      console.error('Failed to clear submissions:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = (submissions || []).filter((sub) => {
     if (filter === 'booked' && sub.stage !== 'appointment_booked') return false;
@@ -152,15 +186,27 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
                 <span
                   style={{
                     backgroundColor: '#dcfce7',
-                    border: '1px solid #16a34a',
+                    border: '1.5px solid #16a34a',
                     color: '#15803d',
                     fontSize: '11px',
                     fontWeight: 800,
-                    padding: '3px 9px',
+                    padding: '4px 10px',
                     borderRadius: '9999px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
                 >
-                  Live JSON Store
+                  <span
+                    style={{
+                      width: '7px',
+                      height: '7px',
+                      borderRadius: '50%',
+                      backgroundColor: '#16a34a',
+                      display: 'inline-block',
+                    }}
+                  />
+                  JSONBin Cloud Active
                 </span>
               </div>
               <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#334155', fontWeight: 500 }}>
@@ -170,6 +216,23 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              type="button"
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              style={{
+                borderRadius: '8px',
+                border: '1px solid #cbd5e1',
+                backgroundColor: autoRefresh ? '#f0fdf4' : '#ffffff',
+                color: autoRefresh ? '#15803d' : '#64748b',
+                padding: '8px 12px',
+                fontSize: '11px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+              title="Automatically refresh submissions every 10 seconds"
+            >
+              Auto-Sync: {autoRefresh ? 'ON (10s)' : 'OFF'}
+            </button>
             <button
               onClick={fetchData}
               style={{
@@ -260,7 +323,7 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
               {submissions.length}
             </div>
             <div style={{ fontSize: '12px', color: '#334155', marginTop: '4px', fontWeight: 600 }}>
-              Saved in <code style={{ color: '#1d4ed8', fontWeight: 700 }}>data/submissions.json</code>
+              Cloud Database: <code style={{ color: '#16a34a', fontWeight: 700 }}>Active &amp; Synced</code>
             </div>
           </div>
 
@@ -328,13 +391,13 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ fontSize: '22px' }}>📁</span>
+            <span style={{ fontSize: '24px' }}>☁️</span>
             <div>
               <div style={{ fontSize: '14px', fontWeight: 800, color: '#000000' }}>
-                Storage File: <span style={{ color: '#1d4ed8', fontFamily: 'monospace' }}>data/submissions.json</span>
+                Cloud Database: <span style={{ color: '#1d4ed8', fontWeight: 800 }}>JSONBin.io Cloud Sync</span>
               </div>
-              <div style={{ fontSize: '12px', color: '#334155', fontWeight: 500 }}>
-                All user inputs before eligibility and appointment bookings persist here in real time.
+              <div style={{ fontSize: '12px', color: '#334155', fontWeight: 500 }} suppressHydrationWarning>
+                All site inputs &amp; booked appointments persist to JSONBin in real time. (Last synced: {lastRefreshed.toLocaleTimeString()})
               </div>
             </div>
           </div>
@@ -364,6 +427,26 @@ export default function AdminDashboardClient({ initialSubmissions }: Props) {
               }}
             >
               Export JSON
+            </button>
+
+            <button
+              onClick={handleClearAll}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                borderRadius: '8px',
+                border: '1.5px solid #fca5a5',
+                backgroundColor: '#fef2f2',
+                color: '#b91c1c',
+                padding: '8px 14px',
+                fontSize: '12px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+              title="Clear all submissions from JSONBin"
+            >
+              Clear All Data
             </button>
 
             <button

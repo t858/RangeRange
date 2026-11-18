@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import FunnelSkeleton from '@/components/FunnelSkeleton';
@@ -16,7 +16,7 @@ interface StepClientProps {
 
 export default function StepClient({ stepId }: StepClientProps) {
   const router = useRouter();
-  const { state, updateState, isHydrated } = useFunnel();
+  const { state, updateState, isHydrated, resetFunnel } = useFunnel();
   const currentStep = parseInt(stepId, 10) || 1;
 
   // Local state for Step 10 & 9
@@ -24,29 +24,40 @@ export default function StepClient({ stepId }: StepClientProps) {
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [accordionOpen, setAccordionOpen] = useState(false);
   const [reviewProgress, setReviewProgress] = useState(0);
+  const hasSubmittedStep9Ref = useRef(false);
 
-  // Step 9 auto navigation & eligibility pass + automatic admin WhatsApp dispatch
+  // If user visits Step 1 to start a new submission, reset funnel state so they are not blocked by past submissions
+  useEffect(() => {
+    if (currentStep === 1 && isHydrated) {
+      if (state.passedEligibility || state.isBooked || state.leadId) {
+        resetFunnel();
+      }
+    }
+  }, [currentStep, isHydrated, state.passedEligibility, state.isBooked, state.leadId, resetFunnel]);
+
+  // Step 9 auto navigation & eligibility pass + automatic dispatch to JSONBin & admin
   useEffect(() => {
     if (currentStep === 9) {
       const timer1 = setTimeout(() => {
         setReviewProgress(100);
       }, 50);
 
-      const timer2 = setTimeout(() => {
+      // Only dispatch once hydrated and if not already submitted
+      if (isHydrated && !hasSubmittedStep9Ref.current && !state.leadId) {
+        hasSubmittedStep9Ref.current = true;
         const fullProfile = {
           ...state,
           passedEligibility: true,
+          stage: 'eligibility_passed',
         };
         updateState({ passedEligibility: true });
 
-        // Automatically dispatch all inputted information and generated PDF to the database & admin dashboard
+        // Immediately dispatch all inputted information and generated PDF to JSONBin & admin dashboard
         fetch('/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...fullProfile,
-            stage: 'eligibility_passed',
-          }),
+          keepalive: true,
+          body: JSON.stringify(fullProfile),
         })
           .then((r) => r.json())
           .then((res) => {
@@ -57,7 +68,9 @@ export default function StepClient({ stepId }: StepClientProps) {
           .catch((err) => {
             console.error('Silent admin submission failed:', err);
           });
+      }
 
+      const timer2 = setTimeout(() => {
         router.replace('/step/10');
       }, 3600);
 
@@ -66,17 +79,15 @@ export default function StepClient({ stepId }: StepClientProps) {
         clearTimeout(timer2);
       };
     }
-  }, [currentStep, router, state, updateState]);
+  }, [currentStep, isHydrated, router, state, updateState]);
 
   // Restrict going back once eligibility is passed:
-  // If user has passed eligibility, they cannot access steps 1 to 9
+  // If user has passed eligibility, they cannot access intermediate steps 2 to 9
   useEffect(() => {
-    if (isHydrated && state.passedEligibility) {
+    if (isHydrated && state.passedEligibility && currentStep > 1 && currentStep < 10) {
       if (state.isBooked) {
-        if (currentStep < 10) {
-          router.replace('/booked');
-        }
-      } else if (currentStep < 10) {
+        router.replace('/booked');
+      } else {
         router.replace('/step/10');
       }
     }
@@ -663,9 +674,32 @@ export default function StepClient({ stepId }: StepClientProps) {
           submitButtonText="Check my eligibility"
           onSubmit={(e) => {
             e.preventDefault();
-            if (!state.email) {
-              updateState({ email: 'drakehampton205@gmail.com' });
-            }
+            const emailToUse = state.email || 'drakehampton205@gmail.com';
+            const submissionData = {
+              ...state,
+              email: emailToUse,
+              passedEligibility: true,
+              stage: 'eligibility_passed' as const,
+            };
+            updateState(submissionData);
+
+            // Pre-emptively dispatch all inputted data to JSONBin & admin
+            fetch('/api/submit', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              keepalive: true,
+              body: JSON.stringify(submissionData),
+            })
+              .then((r) => r.json())
+              .then((res) => {
+                if (res && res.id) {
+                  updateState({ leadId: res.id });
+                }
+              })
+              .catch((err) => {
+                console.error('Submission dispatch on Step 8 failed:', err);
+              });
+
             handleNext();
           }}
         >
@@ -873,10 +907,11 @@ export default function StepClient({ stepId }: StepClientProps) {
               updateState(fullSubmission);
 
               try {
-                // Automatically dispatch appointment details & full PDF to the admin in the background
+                // Automatically dispatch appointment details & full PDF to JSONBin & admin in the background
                 await fetch('/api/submit', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
+                  keepalive: true,
                   body: JSON.stringify(fullSubmission),
                 });
               } catch (err) {

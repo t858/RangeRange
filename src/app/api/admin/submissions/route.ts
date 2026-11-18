@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAllSubmissionsAsync, clearAllSubmissionsAsync } from '@/lib/submissionsStore';
+import { getAllSubmissionsAsync, clearAllSubmissionsAsync, getStorageInfo } from '@/lib/submissionsStore';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
         success: true,
         count: list.length,
         submissions: list,
+        storage: getStorageInfo(),
       },
       {
         headers: {

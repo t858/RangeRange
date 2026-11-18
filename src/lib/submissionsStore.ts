@@ -1,5 +1,24 @@
 import fs from 'fs';
 import path from 'path';
+import dns from 'dns';
+
+// Ensure Node resolves IPv4 first on Windows to avoid getaddrinfo ENOTFOUND errors
+if (typeof dns.setDefaultResultOrder === 'function') {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
+async function fetchWithRetry(url: string, options: RequestInit, retries = 2): Promise<Response> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, options);
+      return res;
+    } catch (err) {
+      if (attempt === retries) throw err;
+      await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
+    }
+  }
+  throw new Error('Fetch failed after retries');
+}
 
 export interface LeadSubmission {
   id: string;
@@ -28,12 +47,20 @@ export interface LeadSubmission {
 const DATA_DIR = path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'submissions.json');
 
-// JSONBin configuration from environment variables
-const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || '';
-const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY || '';
+// JSONBin configuration from environment variables (with default fallback)
+const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || '6aef44deffd5d16053af4a8d';
+const JSONBIN_API_KEY = process.env.JSONBIN_API_KEY || '$2a$10$suA2R1NTVop/Ymsi6ZC.ieK1mJdWRV8G.J1CpUrg4ndgJpeMSC/dC';
 
-function isJsonBinConfigured(): boolean {
+export function isJsonBinConfigured(): boolean {
   return Boolean(JSONBIN_BIN_ID && JSONBIN_API_KEY);
+}
+
+export function getStorageInfo() {
+  return {
+    isConfigured: isJsonBinConfigured(),
+    binId: JSONBIN_BIN_ID,
+    source: isJsonBinConfigured() ? 'JSONBin.io' : 'Local File',
+  };
 }
 
 // In-memory fallback cache so serverless executions don't wipe data between local calls
@@ -86,9 +113,11 @@ function saveLocalSubmissions(list: LeadSubmission[]) {
 export async function getAllSubmissionsAsync(): Promise<LeadSubmission[]> {
   if (isJsonBinConfigured()) {
     try {
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      const res = await fetchWithRetry(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest?_t=${Date.now()}`, {
         headers: {
           'X-Master-Key': JSONBIN_API_KEY,
+          'Cache-Control': 'no-store, no-cache, must-revalidate',
+          Pragma: 'no-cache',
         },
         cache: 'no-store',
       });
@@ -102,6 +131,8 @@ export async function getAllSubmissionsAsync(): Promise<LeadSubmission[]> {
         }
         inMemoryCache = list;
         return list;
+      } else {
+        console.error('Failed to fetch from JSONBin:', res.status, await res.text());
       }
     } catch (e) {
       console.error('Failed to fetch from JSONBin:', e);
@@ -114,7 +145,7 @@ export async function getAllSubmissionsAsync(): Promise<LeadSubmission[]> {
  * Synchronous read for initial SSR render.
  */
 export function getAllSubmissions(): LeadSubmission[] {
-  return getLocalSubmissions();
+  return inMemoryCache || getLocalSubmissions();
 }
 
 /**
@@ -129,12 +160,19 @@ export async function saveOrUpdateSubmissionAsync(data: Partial<LeadSubmission>)
   let existingIndex = -1;
   if (data.id) {
     existingIndex = list.findIndex(item => item.id === data.id);
+  } else if (data.email) {
+    // If id not passed yet, check if there's a recent matching submission with same email created within last 30 minutes
+    const thirtyMinsAgo = Date.now() - 30 * 60 * 1000;
+    existingIndex = list.findIndex(item =>
+      item.email?.toLowerCase() === data.email?.toLowerCase() &&
+      new Date(item.createdAt).getTime() > thirtyMinsAgo
+    );
   }
 
   let record: LeadSubmission;
 
   if (existingIndex >= 0) {
-    // Updating the current session's appointment info on Step 10
+    // Updating the current session's appointment or lead info
     const cleanedUpdates = Object.fromEntries(
       Object.entries(data).filter(([_, v]) => v !== undefined)
     );
@@ -165,14 +203,17 @@ export async function saveOrUpdateSubmissionAsync(data: Partial<LeadSubmission>)
   // Sync to JSONBin in the cloud
   if (isJsonBinConfigured()) {
     try {
-      await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      const res = await fetchWithRetry(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-Master-Key': JSONBIN_API_KEY,
         },
-        body: JSON.stringify(list),
+        body: JSON.stringify({ submissions: list }),
       });
+      if (!res.ok) {
+        console.error(`Failed to sync to JSONBin (Status ${res.status}):`, await res.text());
+      }
     } catch (e) {
       console.error('Failed to sync to JSONBin:', e);
     }
@@ -225,14 +266,17 @@ export async function clearAllSubmissionsAsync(): Promise<void> {
   saveLocalSubmissions([]);
   if (isJsonBinConfigured()) {
     try {
-      await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      const res = await fetchWithRetry(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'X-Master-Key': JSONBIN_API_KEY,
         },
-        body: JSON.stringify([]),
+        body: JSON.stringify({ submissions: [] }),
       });
+      if (!res.ok) {
+        console.error(`Failed to clear JSONBin (Status ${res.status}):`, await res.text());
+      }
     } catch (e) {
       console.error('Failed to clear JSONBin:', e);
     }
